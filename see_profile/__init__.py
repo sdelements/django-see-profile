@@ -28,6 +28,8 @@ class ProfilingMiddleware(BaseMiddleware):
     """
 
     REQUIRED_SETTINGS = ('ENABLE_PROFILING', 'DEBUG')
+    request_separator = f"\n{'=' * 80}\n"
+    query_separator = f"\n{'*' * 80}\n"
 
     def __init__(self, get_response=None):
         super().__init__(get_response)
@@ -39,13 +41,10 @@ class ProfilingMiddleware(BaseMiddleware):
         setattr(self, setting.lower(), value)
 
     def format_queries(self, queries):
-        separater = f"\n{'*' * 80}\n"
-        return separater.join(
+        return self.query_separater.join(
             sqlparse.format(query['sql'], reindent=True, keyword_case='upper')
             for query in queries
         )
-
-    request_separator = f"\n{'=' * 80}\n"
 
     def __call__(self, request):
         # Only profile requests that have a 'X-Profile' HTTP header
@@ -71,7 +70,8 @@ class ProfilingMiddleware(BaseMiddleware):
         # Continue down the middleware chain
         response = self.get_response(request)
 
-        # Stop collecting stats data & return value as string
+        # Get the profile stats & pull out the top cumulative & total time
+        # data
         profile_stats = pstats.Stats(profile, stream=out)
         profile_stats = profile_stats.sort_stats('cumulative')
         profile_stats.print_stats(128)
