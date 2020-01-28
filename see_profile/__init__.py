@@ -56,7 +56,7 @@ class ProfilingMiddleware(BaseMiddleware):
 
         # Add method & path info to differentiate requests
         out.write(
-            f"{request.method} {request.path}"
+            f"{request.method} {request.path}\n\n"
         )
 
         # We can only profile queries in debug mode

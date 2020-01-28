@@ -4,7 +4,7 @@ A simple middleware to capture useful profiling information in Django.
 ## Requirements
 
 * Django 1.10+
-* django-security 0.10.0+
+* django-security 0.9.0+
 
 ## Description
 
