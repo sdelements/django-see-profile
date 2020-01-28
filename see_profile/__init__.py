@@ -41,7 +41,7 @@ class ProfilingMiddleware(BaseMiddleware):
         setattr(self, setting.lower(), value)
 
     def format_queries(self, queries):
-        return self.query_separater.join(
+        return self.query_separator.join(
             sqlparse.format(query['sql'], reindent=True, keyword_case='upper')
             for query in queries
         )
