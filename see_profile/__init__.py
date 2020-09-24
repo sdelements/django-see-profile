@@ -41,10 +41,16 @@ class ProfilingMiddleware(BaseMiddleware):
         setattr(self, setting.lower(), value)
 
     def format_queries(self, queries):
-        return self.query_separator.join(
-            sqlparse.format(query['sql'], reindent=True, keyword_case='upper')
-            for query in queries
-        )
+        formatted_queries = []
+        for query in queries:
+            formatted_sql = sqlparse.format(query['sql'], reindent=True,
+                                            keyword_case='upper')
+
+            formatted_queries.append(
+                "{}:\n{}".format(query['time'], formatted_sql)
+            )
+
+        return self.query_separator.join(formatted_queries)
 
     def __call__(self, request):
         # Only profile requests that have a 'X-Profile' HTTP header
