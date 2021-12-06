@@ -40,8 +40,9 @@ class ProfilingMiddleware(BaseMiddleware):
     def load_setting(self, setting, value):
         setattr(self, setting.lower(), value)
 
-    def format_queries(self, queries):
+    def format_queries_and_time_for_logs(self, queries):
         formatted_queries = []
+        total_time = 0
         for query in queries:
             formatted_sql = sqlparse.format(query['sql'], reindent=True,
                                             keyword_case='upper')
@@ -49,8 +50,10 @@ class ProfilingMiddleware(BaseMiddleware):
             formatted_queries.append(
                 "{}:\n{}".format(query['time'], formatted_sql)
             )
+            total_time += float(query['time'])
 
-        return self.query_separator.join(formatted_queries)
+        log_messages = [f"\n{len(queries)} Queries\nTotal time for queries: {total_time}"] + formatted_queries
+        return self.query_separator.join(log_messages)
 
     def __call__(self, request):
         # Only profile requests that have a 'X-Profile' HTTP header
@@ -87,9 +90,8 @@ class ProfilingMiddleware(BaseMiddleware):
         # Print out our queries
         if self.debug:
             query_count = len(connection.queries) - num_previous_queries
-            out.write(f"\n{query_count} Queries:\n")
             queries = connection.queries[num_previous_queries:]
-            out.write(self.format_queries(queries))
+            out.write(self.format_queries_and_time_for_logs(queries))
 
         out.write(self.request_separator)
         self.logger.debug(out.getvalue())
