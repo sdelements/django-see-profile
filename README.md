@@ -1,3 +1,7 @@
+# Deprecation Notice.
+
+Use the https://github.com/sdelements/django-security package instead.
+
 # django-see-profile
 A simple middleware to capture useful profiling information in Django.
 
